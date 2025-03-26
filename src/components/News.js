@@ -7,37 +7,48 @@ export default class News extends Component {
         this.state = {
             articles: [],
             loading: false,
-            page: 1
+            page: 1,
+            disableNextButton : false
         }
     }
 
     async componentDidMount() {
-        let url = "https://newsapi.org/v2/top-headlines?country=us&apiKey=102a197232314eb39808e64c06fabc1a&page=1";
+        let url = "https://newsapi.org/v2/top-headlines?country=us&apiKey=102a197232314eb39808e64c06fabc1a&page=1&pageSize=20";
         let data = await fetch(url);
         let parsedData = await data.json();
         this.setState({
-            articles: parsedData.articles
+            articles: parsedData.articles,
+            totalResults: parsedData.totalResults
         });
     }
 
     handlePreviousClick = async () => {
-        let url = `https://newsapi.org/v2/top-headlines?country=us&apiKey=102a197232314eb39808e64c06fabc1a&page=${this.state.page - 1}`;
+        let url = `https://newsapi.org/v2/top-headlines?country=us&apiKey=102a197232314eb39808e64c06fabc1a&page=${this.state.page - 1}&pageSize=20`;
         let data = await fetch(url);
         let parsedData = await data.json();
         this.setState({
             articles: parsedData.articles,
-            page: this.state.page - 1
+            page: this.state.page - 1,
+            disableNextButton : !(this.state.page + 1 > Math.ceil(this.state.totalResults / 20))
         });
     }
 
     handleNextClick = async () => {
-        let url = `https://newsapi.org/v2/top-headlines?country=us&apiKey=102a197232314eb39808e64c06fabc1a&page=${this.state.page + 1}`;
-        let data = await fetch(url);
-        let parsedData = await data.json();
-        this.setState({
-            articles: parsedData.articles,
-            page: this.state.page + 1
-        });
+        if (!(this.state.page + 1 > Math.ceil(this.state.totalResults / 20))) {
+            let url = `https://newsapi.org/v2/top-headlines?country=us&apiKey=102a197232314eb39808e64c06fabc1a&page=${this.state.page + 1}&pageSize=20`;
+            let data = await fetch(url);
+            let parsedData = await data.json();
+            this.setState({
+                articles: parsedData.articles,
+                page: this.state.page + 1,
+                disableNextButton: false
+            });
+        }
+        else{
+            this.setState({
+                disableNextButton: true
+            });
+        }
     }
 
     render() {
@@ -55,7 +66,7 @@ export default class News extends Component {
                 </div>
                 <div className='container d-flex justify-content-between'>
                     <button disabled={this.state.page <= 1} type="button" className="btn btn-info" onClick={this.handlePreviousClick}>&#8592;&nbsp;Previous</button>
-                    <button type="button" className="btn btn-warning" onClick={this.handleNextClick}>Next&nbsp;&#8594;</button>
+                    <button disabled={this.state.disableNextButton} type="button" className="btn btn-warning" onClick={this.handleNextClick}>Next&nbsp;&#8594;</button>
                 </div>
             </div>
         )
