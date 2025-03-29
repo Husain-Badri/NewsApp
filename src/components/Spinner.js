@@ -6,7 +6,7 @@ export class Spinner extends Component {
     return (
       <div className="row">
         <div className='col-md-12'>
-          <div class="loader"></div>
+          <div className="loader"></div>
         </div>
       </div>
     )
